@@ -1,0 +1,170 @@
+---
+title: "Evaporation_Article_Main"
+author: "Aziz"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+
+daily <- to_daily(hourly,
+                  mean_vars   = c("d2m","sp","u10","v10","lmlt","lmld","skt"),
+                  sum_vars    = c("ssrd","strd","str","tp","e","pev"),
+                  minmax_vars = "t2m")
+
+forcing <- standardise_forcing(daily, source = "era5_land", wind = "from_uv")
+out     <- Eopen_Penman(forcing, lat_deg = 37.5, elev_m = 542)
+```
+
+```{r}
+## Appendix: computational environment {#sec-environment .appendix}
+
+<!--
+Paste this at the end of the main .qmd, after all analysis chunks.
+
+It records three things, in decreasing order of how often they turn out
+to matter:
+
+  1. Which commit and which data produced this output
+  2. Whether renv was actually honoured at render time
+  3. Package and R versions
+
+sessionInfo() alone covers only (3). With renv in place that is the
+least informative of the three, because renv.lock already documents the
+intended state. What sessionInfo() adds is evidence of the ACTUAL state,
+which is worth having precisely when it disagrees with the lockfile.
+-->
+
+#| label: env-provenance
+#| echo: false
+#| comment: ""
+
+# --- render metadata -------------------------------------------------
+cat("Rendered:      ", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"), "\n", sep = "")
+cat("Working dir:   ", here::here(), "\n", sep = "")
+
+# --- git state -------------------------------------------------------
+# A commit SHA is misleading on its own: if the working tree is dirty,
+# the recorded commit did not produce this output. Report both.
+git <- tryCatch({
+  sha   <- system2("git", c("rev-parse", "--short", "HEAD"),
+                   stdout = TRUE, stderr = FALSE)
+  dirty <- length(system2("git", c("status", "--porcelain"),
+                          stdout = TRUE, stderr = FALSE)) > 0
+  list(sha = sha, dirty = dirty)
+}, error = function(e) NULL, warning = function(w) NULL)
+
+if (is.null(git) || !length(git$sha)) {
+  cat("Git commit:    unavailable (not a repo, or git not on PATH)\n")
+} else {
+  cat("Git commit:    ", git$sha,
+      if (git$dirty) "  [UNCOMMITTED CHANGES PRESENT]" else "  (clean tree)",
+      "\n", sep = "")
+}
+
+#| label: env-data-provenance
+#| echo: false
+#| comment: ""
+
+# --- input data fingerprints -----------------------------------------
+# The single most useful line in this appendix. Package versions rarely
+# change a result; a silently re-downloaded or re-processed input file
+# routinely does. Checksums make that visible.
+#
+# Point this at the processed inputs the analysis actually reads, not at
+# the raw ERA5-Land NetCDFs (too large, and not what the chain consumes).
+
+data_files <- c(
+  here::here("data", "forcing_era5land_daily.rds"),
+  here::here("data", "forcing_nasapower_daily.rds"),
+  here::here("data", "area_dahiti.rds"),
+  here::here("data", "area_jrc.rds"),
+  here::here("data", "lst_modis.rds")
+)
+
+present <- data_files[file.exists(data_files)]
+
+if (!length(present)) {
+  cat("No processed input files found at the expected paths.\n")
+} else {
+  info <- data.frame(
+    file     = basename(present),
+    size_MB  = round(file.size(present) / 1024^2, 2),
+    modified = format(file.mtime(present), "%Y-%m-%d"),
+    md5      = substr(unname(tools::md5sum(present)), 1, 12),
+    row.names = NULL
+  )
+  print(info, right = FALSE)
+}
+
+absent <- setdiff(data_files, present)
+if (length(absent))
+  cat("\nExpected but not found: ",
+      paste(basename(absent), collapse = ", "), "\n", sep = "")
+
+#| label: env-renv
+#| echo: false
+#| comment: ""
+
+# --- was renv actually honoured? -------------------------------------
+if (requireNamespace("renv", quietly = TRUE)) {
+  st <- tryCatch(renv::status(), error = function(e) NULL)
+  if (is.null(st)) {
+    cat("renv installed but no project state could be read.\n")
+  } else if (isTRUE(st$synchronized)) {
+    cat("renv: library synchronised with renv.lock\n")
+  } else {
+    cat("renv: LIBRARY OUT OF SYNC WITH renv.lock.\n",
+        "      Run renv::status() interactively before trusting these results.\n",
+        sep = "")
+  }
+} else {
+  cat("renv not installed — package versions below are not reproducible.\n")
+}
+
+#| label: env-session
+#| echo: false
+#| comment: ""
+
+# sessioninfo::session_info() is preferred over base sessionInfo(): it
+# reports the SOURCE of each package (CRAN, Bioconductor, GitHub SHA),
+# which base R omits and which matters if anything came from GitHub.
+if (requireNamespace("sessioninfo", quietly = TRUE)) {
+  sessioninfo::session_info(to_file = FALSE)
+} else {
+  sessionInfo()
+}
+
+<!--
+NOTE ON PLACEMENT AND CACHING
+
+sessionInfo() reports packages attached AT THIS POINT in the render. Two
+ways that becomes a lie:
+
+  - Chunk caching (`cache: true`). Cached chunks do not re-attach their
+    packages, so a package used by a cached analysis chunk may be absent
+    from this listing. If you cache anything, say so in Methods.
+
+  - Rendering the document in pieces during development. The appendix
+    reflects the session that rendered it, not the session that produced
+    each figure. Before submission, render once end-to-end from a clean
+    session (`renv::restore()`, then Quarto render) and use THAT output.
+
+For the code availability statement, cite the commit SHA reported above,
+and tag it in the repo so the reference is stable:
+
+    git tag -a submission-v1 -m "State at journal submission"
+    git push origin submission-v1
+-->
+
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).

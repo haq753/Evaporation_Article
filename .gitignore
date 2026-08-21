@@ -1,0 +1,26 @@
+# R / RStudio
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# renv — lockfile IS committed, library is not
+renv/library/
+renv/staging/
+renv/python/
+
+# Data: too large for git, and not yours to redistribute
+data-raw/
+data/
+*.nc
+*.tif
+*.rds
+
+# Quarto
+/.quarto/
+*_files/
+*_cache/
+
+# OS
+Thumbs.db
+.DS_Store
