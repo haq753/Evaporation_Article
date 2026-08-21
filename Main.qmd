@@ -27,21 +27,21 @@ out     <- Eopen_Penman(forcing, lat_deg = 37.5, elev_m = 542)
 ```{r}
 ## Appendix: computational environment {#sec-environment .appendix}
 
-<!--
-Paste this at the end of the main .qmd, after all analysis chunks.
-
-It records three things, in decreasing order of how often they turn out
-to matter:
-
-  1. Which commit and which data produced this output
-  2. Whether renv was actually honoured at render time
-  3. Package and R versions
-
-sessionInfo() alone covers only (3). With renv in place that is the
-least informative of the three, because renv.lock already documents the
-intended state. What sessionInfo() adds is evidence of the ACTUAL state,
-which is worth having precisely when it disagrees with the lockfile.
--->
+# <!--
+# Paste this at the end of the main .qmd, after all analysis chunks.
+# 
+# It records three things, in decreasing order of how often they turn out
+# to matter:
+# 
+#   1. Which commit and which data produced this output
+#   2. Whether renv was actually honoured at render time
+#   3. Package and R versions
+# 
+# sessionInfo() alone covers only (3). With renv in place that is the
+# least informative of the three, because renv.lock already documents the
+# intended state. What sessionInfo() adds is evidence of the ACTUAL state,
+# which is worth having precisely when it disagrees with the lockfile.
+# -->
 
 #| label: env-provenance
 #| echo: false
@@ -143,27 +143,27 @@ if (requireNamespace("sessioninfo", quietly = TRUE)) {
   sessionInfo()
 }
 
-<!--
-NOTE ON PLACEMENT AND CACHING
-
-sessionInfo() reports packages attached AT THIS POINT in the render. Two
-ways that becomes a lie:
-
-  - Chunk caching (`cache: true`). Cached chunks do not re-attach their
-    packages, so a package used by a cached analysis chunk may be absent
-    from this listing. If you cache anything, say so in Methods.
-
-  - Rendering the document in pieces during development. The appendix
-    reflects the session that rendered it, not the session that produced
-    each figure. Before submission, render once end-to-end from a clean
-    session (`renv::restore()`, then Quarto render) and use THAT output.
-
-For the code availability statement, cite the commit SHA reported above,
-and tag it in the repo so the reference is stable:
-
-    git tag -a submission-v1 -m "State at journal submission"
-    git push origin submission-v1
--->
+# <!--
+# NOTE ON PLACEMENT AND CACHING
+# 
+# sessionInfo() reports packages attached AT THIS POINT in the render. Two
+# ways that becomes a lie:
+# 
+#   - Chunk caching (`cache: true`). Cached chunks do not re-attach their
+#     packages, so a package used by a cached analysis chunk may be absent
+#     from this listing. If you cache anything, say so in Methods.
+# 
+#   - Rendering the document in pieces during development. The appendix
+#     reflects the session that rendered it, not the session that produced
+#     each figure. Before submission, render once end-to-end from a clean
+#     session (`renv::restore()`, then Quarto render) and use THAT output.
+# 
+# For the code availability statement, cite the commit SHA reported above,
+# and tag it in the repo so the reference is stable:
+# 
+#     git tag -a submission-v1 -m "State at journal submission"
+#     git push origin submission-v1
+# -->
 
 ```
 
