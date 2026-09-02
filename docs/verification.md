@@ -10,6 +10,45 @@ example, never taken from recollection; and a disagreement was diagnosed before 
 treated as passing (see the Rn/Rnl notes below for the one case where a gap turned out
 to be a legitimate published-convention difference rather than a bug).
 
+## Methods text — model verification (ready to paste)
+
+*Two paragraphs, written for a "Model verification" subsection of Methods. The figures
+cited are the same ones tabulated below; this is the compact prose version.*
+
+Before application to Atatürk Reservoir, the reference evapotranspiration and open-water
+evaporation routines, and the psychrometric and radiation-geometry functions they share,
+were verified against independently published worked examples rather than against each
+other. The FAO-56 Penman-Monteith reference evapotranspiration routine reproduces the two
+fully worked examples given in Allen et al. (1998): Example 18 (Uccle, Belgium, 6 July)
+gives ETo = 3.88 mm day⁻¹ against a published 3.9 mm day⁻¹, and Example 20 (Lyon, France,
+with missing wind and sunshine data) gives 4.56 mm day⁻¹ against a published 4.6 mm
+day⁻¹, with every reported intermediate (saturation and actual vapour pressure, net
+radiation) agreeing to within 0.5%. The extraterrestrial radiation routine that both
+models draw on was checked at five independently computed or published reference points,
+including the study latitude (37.5°N) at the summer and winter solstice (41.78 and 15.07
+MJ m⁻² d⁻¹ respectively), all agreeing to within 1 × 10⁻⁴ MJ m⁻² d⁻¹ of values recomputed
+directly from the governing equations (Allen et al., 1998, Eqs 21–25).
+
+The open-water Penman combination model was verified against Worked Example 3 of McMahon
+et al. (2013; HESS 17, 1331–1363, Supplement Section S19: Alice Springs Airport,
+Australia, 20 July 1980), with heat storage set to zero to isolate the base combination
+equation from the reservoir-specific heat-storage term introduced later in this study.
+Every psychrometric and radiative intermediate value agreed with the published example to
+within 0.06%, the small residual in net longwave radiation being fully attributable to a
+documented difference in the Kelvin-conversion constant between FAO-56 (T + 273.16 K) and
+McMahon et al. (T + 273.2 K), rather than to any implementation error. Using the wind
+function adopted throughout McMahon et al.'s worked examples (Penman, 1956:
+f(u₂) = 1.313 + 1.381u₂), the model reproduced their published open-water evaporation
+estimate (2.9797 mm day⁻¹) to within 0.04% (2.9808 mm day⁻¹ computed). The wind function
+adopted for the main analysis in this study — 6.43(1 + 0.536u₂) MJ m⁻² d⁻¹ kPa⁻¹,
+following Shuttleworth (1993) — is a distinct, equally well-established published
+parameterisation calibrated on land-based rather than open-water wind observations; for
+the verification case the two published wind functions differ by 19% in the resulting
+evaporation estimate, holding all other inputs identical. This sensitivity is quantified
+and reported explicitly in [Section X / Table X] rather than treated as model
+uncertainty, since it reflects a defensible methodological choice rather than an error
+bound.
+
 ## `ETo_FAO56()` — FAO-56 (Allen et al., 1998), Examples 18 and 20
 
 | Quantity | Published | Computed | Note |
