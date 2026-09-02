@@ -24,25 +24,33 @@ forcing <- standardise_forcing(daily, source = "era5_land", wind = "from_uv")
 out     <- Eopen_Penman(forcing, lat_deg = 37.5, elev_m = 542)
 ```
 
-```{r}
 ## Appendix: computational environment {#sec-environment .appendix}
 
-# <!--
-# Paste this at the end of the main .qmd, after all analysis chunks.
-# 
-# It records three things, in decreasing order of how often they turn out
-# to matter:
-# 
-#   1. Which commit and which data produced this output
-#   2. Whether renv was actually honoured at render time
-#   3. Package and R versions
-# 
-# sessionInfo() alone covers only (3). With renv in place that is the
-# least informative of the three, because renv.lock already documents the
-# intended state. What sessionInfo() adds is evidence of the ACTUAL state,
-# which is worth having precisely when it disagrees with the lockfile.
-# -->
+```{=html}
+<!--
+Paste this at the end of the main .qmd, after all analysis chunks.
 
+It records three things, in decreasing order of how often they turn out
+to matter:
+
+  1. Which commit and which data produced this output
+  2. Whether renv was actually honoured at render time
+  3. Package and R versions
+
+sessionInfo() alone covers only (3). With renv in place that is the
+least informative of the three, because renv.lock already documents the
+intended state. What sessionInfo() adds is evidence of the ACTUAL state,
+which is worth having precisely when it disagrees with the lockfile.
+
+NOTE: this appendix used to be a single R chunk holding all four labelled
+sections below. That produced a "duplicate map key: label" YAML error
+(renv's dependency scanner reads all `#|` lines in one chunk as one
+options block) and silently made renv skip this file when enumerating
+dependencies. Fixed by giving each labelled section its own chunk.
+-->
+```
+
+```{r}
 #| label: env-provenance
 #| echo: false
 #| comment: ""
@@ -69,7 +77,9 @@ if (is.null(git) || !length(git$sha)) {
       if (git$dirty) "  [UNCOMMITTED CHANGES PRESENT]" else "  (clean tree)",
       "\n", sep = "")
 }
+```
 
+```{r}
 #| label: env-data-provenance
 #| echo: false
 #| comment: ""
@@ -109,7 +119,9 @@ absent <- setdiff(data_files, present)
 if (length(absent))
   cat("\nExpected but not found: ",
       paste(basename(absent), collapse = ", "), "\n", sep = "")
+```
 
+```{r}
 #| label: env-renv
 #| echo: false
 #| comment: ""
@@ -129,7 +141,9 @@ if (requireNamespace("renv", quietly = TRUE)) {
 } else {
   cat("renv not installed — package versions below are not reproducible.\n")
 }
+```
 
+```{r}
 #| label: env-session
 #| echo: false
 #| comment: ""
@@ -142,29 +156,30 @@ if (requireNamespace("sessioninfo", quietly = TRUE)) {
 } else {
   sessionInfo()
 }
+```
 
-# <!--
-# NOTE ON PLACEMENT AND CACHING
-# 
-# sessionInfo() reports packages attached AT THIS POINT in the render. Two
-# ways that becomes a lie:
-# 
-#   - Chunk caching (`cache: true`). Cached chunks do not re-attach their
-#     packages, so a package used by a cached analysis chunk may be absent
-#     from this listing. If you cache anything, say so in Methods.
-# 
-#   - Rendering the document in pieces during development. The appendix
-#     reflects the session that rendered it, not the session that produced
-#     each figure. Before submission, render once end-to-end from a clean
-#     session (`renv::restore()`, then Quarto render) and use THAT output.
-# 
-# For the code availability statement, cite the commit SHA reported above,
-# and tag it in the repo so the reference is stable:
-# 
-#     git tag -a submission-v1 -m "State at journal submission"
-#     git push origin submission-v1
-# -->
+```{=html}
+<!--
+NOTE ON PLACEMENT AND CACHING
 
+sessionInfo() reports packages attached AT THIS POINT in the render. Two
+ways that becomes a lie:
+
+  - Chunk caching (`cache: true`). Cached chunks do not re-attach their
+    packages, so a package used by a cached analysis chunk may be absent
+    from this listing. If you cache anything, say so in Methods.
+
+  - Rendering the document in pieces during development. The appendix
+    reflects the session that rendered it, not the session that produced
+    each figure. Before submission, render once end-to-end from a clean
+    session (`renv::restore()`, then Quarto render) and use THAT output.
+
+For the code availability statement, cite the commit SHA reported above,
+and tag it in the repo so the reference is stable:
+
+    git tag -a submission-v1 -m "State at journal submission"
+    git push origin submission-v1
+-->
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).

@@ -24,3 +24,4 @@ data/
 # OS
 Thumbs.db
 .DS_Store
+.positai

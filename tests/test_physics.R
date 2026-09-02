@@ -13,7 +13,7 @@ library(testthat)
 
 source(here::here("R", "utils_physics.R"))
 source(here::here("R", "FAO56_ETo.R"))
-source(here::here("R", "Penman_Combination_ETo.R"))
+source(here::here("R", "Penman_Combination_Open_ETo.R"))
 source(here::here("R", "Wind_10m_to_2m.R"))
 
 
@@ -50,6 +50,16 @@ test_that("extraterrestrial radiation matches FAO-56 Annex 2", {
   expect_equal(Ra_calc(50.80, 187), 41.088, tolerance = 1e-3)  # Uccle, 6 Jul
   expect_equal(Ra_calc(45.72, 196), 40.555, tolerance = 1e-3)  # Lyon, 15 Jul
   expect_equal(Ra_calc(0, 80),      37.82427,   tolerance = 1e-5)  # equator, equinox
+})
+
+test_that("extraterrestrial radiation is correct at the Ataturk site bracket", {
+  # 37.5 N, summer and winter solstice. Independently computed from the
+  # FAO-56 Eq. 21-25 Ra formula (not recalled): 41.7790 and 15.0687.
+  # Earlier recalled figures of ~41.5 / ~16.1 were wrong; see handover
+  # doc section 5. These are regression values pinned to the same
+  # formula already verified against Uccle/Lyon/equator above.
+  expect_equal(Ra_calc(37.5, 172), 41.779, tolerance = 1e-3)  # 21 Jun
+  expect_equal(Ra_calc(37.5, 355), 15.069, tolerance = 1e-3)  # 21 Dec
 })
 
 test_that("daylight hours are sane and clamped", {
@@ -165,7 +175,101 @@ test_that("FAO-56 Example 20 reproduces", {
 
 
 # ---------------------------------------------------------------
-# 4. Guard behaviour
+# 4. Eopen_Penman Gate B — McMahon et al. (2013), HESS 17, 1331-1363,
+#    Supplement Section S19, Worked Examples 1-3. Alice Springs
+#    Airport, 20 Jul 1980, G = 0 (no heat storage).
+# ---------------------------------------------------------------
+# Published inputs: lat 23.7951 S, elev 546 m
+#                    Tmax 21.0 C, Tmin 2.0 C, RHmax 71 %, RHmin 25 %
+#                    wind run 51 km/day at 2 m -> u2 = 0.5903 m/s
+#                    Rs (given) = 17.1940 MJ m-2 d-1
+# Published answer:  EPenOW = 2.9797 mm/day, using the Penman (1956)
+#                    wind function f(u) = 1.313 + 1.381 u2 (Eq. S4.3) -
+#                    NOT this project's default wind function, so the
+#                    test below calls wind_fn = "penman1956" explicitly.
+#
+# ea is supplied here as an equivalent dewpoint (prepare_forcing() takes
+# Tdmean_C, not RH), inverted from the paper's own RHmax/RHmin route
+# (Eq. S2.7) so the input is equivalent, not independent, for that one
+# step.
+#
+# Rnl/Rn are expected to differ from the paper by ~0.06%: FAO-56 Eq. 39
+# uses T + 273.16, McMahon uses T + 273.2 (see utils_physics.R header).
+# Both conventions are legitimate; the difference is not a bug.
+
+test_that("Eopen_Penman reproduces McMahon et al. (2013) Worked Example 3", {
+
+  lat  <- -23.7951
+  elev <- 546
+  Tmax <- 21.0
+  Tmin <- 2.0
+  u2   <- 51 * 1000 / (24 * 60 * 60)   # wind run -> m/s
+  expect_equal(u2, 0.5903, tolerance = 1e-3)   # published intermediate
+
+  # ea from RHmax/RHmin (Eq. S2.7), same form as FAO-56 Eq. 17
+  ea <- (es_kPa(Tmin) * 71 / 100 + es_kPa(Tmax) * 25 / 100) / 2
+  expect_equal(ea, 0.5614, tolerance = 1e-3)   # published intermediate
+
+  df <- data.frame(
+    date           = as.Date("1980-07-20"),
+    Tmax_C         = Tmax,
+    Tmin_C         = Tmin,
+    Tdmean_C       = td_from_ea(ea),
+    u2             = u2,
+    ssrd_MJ_m2_day = 17.1940              # given, per the paper's own note
+  )
+
+  out <- Eopen_Penman(df, lat_deg = lat, elev_m = elev, albedo = 0.08,
+                       G = 0, wind_fn = "penman1956", verbose = FALSE)
+
+  # Published intermediates (Worked Examples 1-2)
+  expect_equal(out$Tmean_C,  11.5,    tolerance = 1e-3)
+  expect_equal(out$es,       1.5963,  tolerance = 1e-3)
+  expect_equal(out$ea,       0.5614,  tolerance = 1e-3)
+  expect_equal(out$vpd,      1.0349,  tolerance = 1e-3)
+  expect_equal(out$Ra_MJ,    23.6182, tolerance = 1e-3)
+  expect_equal(out$Rso_MJ,   17.9716, tolerance = 1e-3)
+  expect_equal(out$Rns_MJ,   15.8184, tolerance = 1e-3)
+  expect_equal(out$Rnl_MJ,   7.1784,  tolerance = 5e-3)   # 273.16 vs 273.2, see above
+  expect_equal(out$Rn_MJ,    8.6401,  tolerance = 5e-3)
+
+  # Published answer (Worked Example 3). Tolerance set from the observed
+  # 0.04% gap, itself attributable to rounding in the paper's own
+  # hand-worked intermediate steps.
+  expect_equal(out$Eopen_mm, 2.9797, tolerance = 2e-3)
+})
+
+test_that("Eopen_Penman default wind function differs from Penman (1956) as documented", {
+  # Regression guard on the ~19% gap between the project's default wind
+  # function (fao56_shuttleworth) and McMahon's own choice (penman1956)
+  # for the same Alice Springs inputs - see the header note in
+  # R/Penman_Combination_Open_ETo.R. This is a deliberate methodological
+  # choice, not a bug; this test just pins the magnitude so a silent
+  # change in either wind function is caught.
+
+  df <- data.frame(
+    date           = as.Date("1980-07-20"),
+    Tmax_C         = 21.0,
+    Tmin_C         = 2.0,
+    Tdmean_C       = td_from_ea(0.5614),
+    u2             = 0.5903,
+    ssrd_MJ_m2_day = 17.1940
+  )
+
+  out_default <- Eopen_Penman(df, lat_deg = -23.7951, elev_m = 546,
+                               albedo = 0.08, G = 0, verbose = FALSE)
+  out_penman  <- Eopen_Penman(df, lat_deg = -23.7951, elev_m = 546,
+                               albedo = 0.08, G = 0,
+                               wind_fn = "penman1956", verbose = FALSE)
+
+  expect_equal(out_default$Eopen_mm, 3.548, tolerance = 5e-3)
+  expect_equal((out_default$Eopen_mm / out_penman$Eopen_mm - 1) * 100,
+               19.0, tolerance = 1)
+})
+
+
+# ---------------------------------------------------------------
+# 5. Guard behaviour
 # ---------------------------------------------------------------
 
 test_that("guards fire on impossible inputs", {
@@ -193,7 +297,7 @@ test_that("guards fire on impossible inputs", {
 
 
 # ---------------------------------------------------------------
-# 5. ALIGNMENT REGRESSION TEST
+# 6. ALIGNMENT REGRESSION TEST
 # ---------------------------------------------------------------
 # Eopen_Penman() sorts df by date internally. G and Tw_C arrive as
 # arguments, outside the data frame. If they are not carried through the
