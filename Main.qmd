@@ -24,6 +24,11 @@ forcing <- standardise_forcing(daily, source = "era5_land", wind = "from_uv")
 out     <- Eopen_Penman(forcing, lat_deg = 37.5, elev_m = 542)
 ```
 
+```{r}
+source(here::here("data-raw", "build_daily_forcing.R"))
+source(here::here("data-raw", "arrival_sanity_checks.R"))
+```
+
 ## Appendix: computational environment {#sec-environment .appendix}
 
 ```{=html}
