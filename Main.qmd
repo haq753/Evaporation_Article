@@ -5,28 +5,26 @@ format: html
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
+## Analysis
 
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
-```{r}
-
-daily <- to_daily(hourly,
-                  mean_vars   = c("d2m","sp","u10","v10","lmlt","lmld","skt"),
-                  sum_vars    = c("ssrd","strd","str","tp","e","pev"),
-                  minmax_vars = "t2m")
-
-forcing <- standardise_forcing(daily, source = "era5_land", wind = "from_uv")
-out     <- Eopen_Penman(forcing, lat_deg = 37.5, elev_m = 542)
-```
+## Data Analysis and QA
 
 ```{r}
 source(here::here("data-raw", "build_daily_forcing.R"))
 source(here::here("data-raw", "arrival_sanity_checks.R"))
+source(here::here("data-raw", "fetch_dahiti.R"))
+
+#Remasking ERA5 Cells to polygon
+source(here::here("data-raw", "remask_forcing_to_reservoir.R"))
+```
+
+```{r}
+daily <- to_daily(hourly, mean_vars = c("d2m","sp","u10","v10","lmlt","lmld","skt"), sum_vars = c("ssrd","strd","str","tp","e","pev"), minmax_vars = "t2m")
+
+forcing <- standardise_forcing(daily, source = "era5_land", wind = "from_uv")
+out <- Eopen_Penman(forcing, lat_deg = 37.5, elev_m = 542)
 ```
 
 ## Appendix: computational environment {#sec-environment .appendix}
