@@ -10,7 +10,10 @@ renv/staging/
 renv/python/
 
 # Data: too large for git, and not yours to redistribute
-data-raw/
+# data-raw/: ignore the downloads, keep the pipeline scripts
+data-raw/*
+!data-raw/*.R
+!data-raw/*.py
 data/
 *.nc
 *.tif
