@@ -9,7 +9,7 @@ editor: visual
 
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
-## Data Analysis and QA
+## Data Gathering, Analysis and QA
 
 ```{r}
 source(here::here("data-raw", "build_daily_forcing.R"))
@@ -18,6 +18,10 @@ source(here::here("data-raw", "fetch_dahiti.R"))
 
 #Remasking ERA5 Cells to polygon
 source(here::here("data-raw", "remask_forcing_to_reservoir.R"))
+
+#NASA Power data download
+source(here::here("data-raw", "fetch_nasa_power.R"))
+
 ```
 
 ```{r}

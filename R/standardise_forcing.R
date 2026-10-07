@@ -76,11 +76,12 @@ MAP_ERA5_LAND <- tibble::tribble(
   "cl",             "lake_cover",                1,        0
 )
 
-# VERIFY THESE AGAINST YOUR ACTUAL DOWNLOAD HEADER.
-# POWER unit conventions have changed across API versions — in particular
-# ALLSKY_SFC_SW_DWN has been served in both MJ/m2/day and kW-hr/m2/day,
-# and PS in both kPa and Pa. Do not trust this table until you have read
-# the units line of the file you downloaded.
+# Units VERIFIED 7 Oct 2026 against the header printed by the real POWER
+# download (community AG, daily, nasapower::get_power): T2M_MAX / T2M_MIN /
+# T2MDEW in C, PS in kPa, ALLSKY_SFC_SW_DWN and ALLSKY_SFC_LW_DWN in
+# MJ/m^2/day, PRECTOTCORR in mm/day, WS10M in m/s. POWER has changed unit
+# conventions across API versions before, so data-raw/fetch_nasa_power.R
+# also carries a magnitude guard that stops the run if they change again.
 MAP_NASA_POWER <- tibble::tribble(
   ~source,             ~name,              ~factor, ~offset,
   "date",              "date",                  NA,      NA,
@@ -88,7 +89,7 @@ MAP_NASA_POWER <- tibble::tribble(
   "T2M_MIN",           "Tmin_C",                 1,       0,
   "T2MDEW",            "Tdmean_C",               1,       0,
   "PS",                "sp_Pa",               1000,       0,   # kPa -> Pa
-  "ALLSKY_SFC_SW_DWN", "ssrd_MJ_m2_day",         1,       0,   # assumed MJ/m2/day
+  "ALLSKY_SFC_SW_DWN", "ssrd_MJ_m2_day",         1,       0,   # MJ/m2/day, verified
   "ALLSKY_SFC_LW_DWN", "strd_MJ_m2_day",         1,       0,
   "PRECTOTCORR",       "tp_mm",                  1,       0
 )
