@@ -63,7 +63,8 @@ run_E <- function(base, u10, wind_fn, scale = 1) {
     filter(n_valid >= 365)
   stopifnot(nrow(ann) == 32, max(ann$year) == 2024)
   list(ann = ann, u2_mean = mean(d$u2, na.rm = TRUE),
-       aero_share = sum(o$aero_mm) / sum(o$Eopen_mm))
+       aero_share = sum(o$aero_mm[o$year <= 2024], na.rm = TRUE) /
+                    sum(o$Eopen_mm[o$year <= 2024], na.rm = TRUE))
 }
 
 summarise_run <- function(label, r) {
