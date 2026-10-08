@@ -27,7 +27,7 @@ source(here::here("data-raw", "fetch_nasa_power.R"))
 ```{r}
 daily <- to_daily(hourly, mean_vars = c("d2m","sp","u10","v10","lmlt","lmld","skt"), sum_vars = c("ssrd","strd","str","tp","e","pev"), minmax_vars = "t2m")
 
-forcing <- standardise_forcing(daily, source = "era5_land", wind = "from_uv")
+forcing <- standardise_forcing(daily, source = "era5_land", wind = "from_u10")
 out <- Eopen_Penman(forcing, lat_deg = 37.5, elev_m = 542)
 ```
 
